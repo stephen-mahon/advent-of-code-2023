@@ -7,7 +7,24 @@ import (
 	"os"
 )
 
-func GetStrings(path string) (vals []string, err error) {
+func Lines(path string) (lines []string, err error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	s := bufio.NewScanner(f)
+	s.Split(bufio.ScanLines)
+
+	for s.Scan() {
+		lines = append(lines, s.Text())
+	}
+
+	return lines, nil
+}
+
+func Data(path string) (data []string, err error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -22,10 +39,10 @@ func GetStrings(path string) (vals []string, err error) {
 			log.Printf("discarding bad data point %q: %v", s.Text(), err)
 			continue
 		}
-		vals = append(vals, val)
+		data = append(data, val)
 	}
 	if err := s.Err(); err != nil {
 		return nil, fmt.Errorf("could not scan: %v", err)
 	}
-	return vals, nil
+	return data, nil
 }

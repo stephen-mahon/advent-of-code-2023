@@ -8,6 +8,6 @@ import (
 
 func main() {
 
-	fmt.Println(day.One())
+	fmt.Println(day.Two())
 
 }

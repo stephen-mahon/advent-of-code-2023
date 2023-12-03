@@ -13,7 +13,7 @@ func One() (ans1, ans2 int) {
 	fileName := flag.String("f", "input.txt", "input file name")
 	flag.Parse()
 
-	dat, err := read.GetStrings(*fileName)
+	dat, err := read.Data(*fileName)
 	if err != nil {
 		log.Fatalf("could not read %s: %v", *fileName, err)
 	}
