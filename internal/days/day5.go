@@ -19,72 +19,30 @@ func Five() {
 		log.Fatalf("could not read %s: %v", *fileName, err)
 	}
 
-	seeds, soil, fert, water, light, temp, humid, loc := dataFive(data)
+	seedRanges, conditions := dataFive(data)
 
-	// soil, fert, water, light, temp, humid, loc
-
-	soilMap := createMap(soil)
-	fertMap := createMap(fert)
-	waterMap := createMap(water)
-	lightMap := createMap(light)
-	tempMap := createMap(temp)
-	humidMap := createMap(humid)
-	locMap := createMap(loc)
+	var seeds []int
+	for i := 0; i < len(seedRanges); i += 2 {
+		for j := seedRanges[i]; j < seedRanges[i]+seedRanges[i+1]; j++ {
+			seeds = append(seeds, j)
+		}
+	}
 
 	var locs []int
-	for _, seed := range seeds {
-		_, ok := soilMap[seed]
-		if ok {
-			seed = soilMap[seed]
+	for i := range seeds {
+		for _, condition := range conditions {
+			for j := 0; j < len(condition); j++ {
+				v := condition[j]
+				if seeds[i] >= v.src && seeds[i] < v.src+v.span {
+					seeds[i] = v.des + seeds[i] - v.src
+					break
+				}
+			}
 		}
-
-		_, ok = fertMap[seed]
-		if ok {
-			seed = fertMap[seed]
-		}
-
-		_, ok = waterMap[seed]
-		if ok {
-			seed = waterMap[seed]
-		}
-
-		_, ok = lightMap[seed]
-		if ok {
-			seed = lightMap[seed]
-		}
-
-		_, ok = tempMap[seed]
-		if ok {
-			seed = tempMap[seed]
-		}
-
-		_, ok = humidMap[seed]
-		if ok {
-			seed = humidMap[seed]
-		}
-
-		_, ok = locMap[seed]
-		if ok {
-			seed = locMap[seed]
-		}
-
-		locs = append(locs, seed)
+		locs = append(locs, seeds[i])
 	}
 
 	fmt.Println(findMin(locs))
-
-}
-
-func createMap(vs []seed) map[int]int {
-	mapArr := make(map[int]int)
-	for _, v := range vs {
-		j := v.des
-		for i := v.src; i < v.src+v.span; i++ {
-			mapArr[i] = j
-			j++
-		}
-	}
-	return mapArr
 }
 
 type seed struct {
@@ -93,7 +51,8 @@ type seed struct {
 	span int // range is reserved
 }
 
-func dataFive(data []string) (seeds []int, soilMap, fertMap, waterMap, lightMap, tempMap, humidMap, locMap []seed) {
+func dataFive(data []string) (seeds []int, conditions [][]seed) {
+	var soilMap, fertMap, waterMap, lightMap, tempMap, humidMap, locMap []seed
 	for _, v := range strings.Split(data[0][7:], " ") {
 		val, err := strconv.Atoi(v)
 		if err != nil {
@@ -115,6 +74,7 @@ func dataFive(data []string) (seeds []int, soilMap, fertMap, waterMap, lightMap,
 
 		soilMap = append(soilMap, seed{d, s, r})
 	}
+	conditions = append(conditions, soilMap)
 
 	for i := range data {
 		if data[i] == "" {
@@ -128,6 +88,7 @@ func dataFive(data []string) (seeds []int, soilMap, fertMap, waterMap, lightMap,
 
 		fertMap = append(fertMap, seed{d, s, r})
 	}
+	conditions = append(conditions, fertMap)
 
 	for i := range data {
 		if data[i] == "" {
@@ -141,6 +102,7 @@ func dataFive(data []string) (seeds []int, soilMap, fertMap, waterMap, lightMap,
 
 		waterMap = append(waterMap, seed{d, s, r})
 	}
+	conditions = append(conditions, waterMap)
 
 	for i := range data {
 		if data[i] == "" {
@@ -154,6 +116,7 @@ func dataFive(data []string) (seeds []int, soilMap, fertMap, waterMap, lightMap,
 
 		lightMap = append(lightMap, seed{d, s, r})
 	}
+	conditions = append(conditions, lightMap)
 
 	for i := range data {
 		if data[i] == "" {
@@ -167,6 +130,7 @@ func dataFive(data []string) (seeds []int, soilMap, fertMap, waterMap, lightMap,
 
 		tempMap = append(tempMap, seed{d, s, r})
 	}
+	conditions = append(conditions, tempMap)
 
 	for i := range data {
 		if data[i] == "" {
@@ -180,6 +144,7 @@ func dataFive(data []string) (seeds []int, soilMap, fertMap, waterMap, lightMap,
 
 		humidMap = append(humidMap, seed{d, s, r})
 	}
+	conditions = append(conditions, humidMap)
 
 	for i := range data {
 		vals := strings.Split(data[i], " ")
@@ -189,6 +154,7 @@ func dataFive(data []string) (seeds []int, soilMap, fertMap, waterMap, lightMap,
 
 		locMap = append(locMap, seed{d, s, r})
 	}
+	conditions = append(conditions, locMap)
 
 	return
 }
