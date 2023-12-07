@@ -2,14 +2,14 @@ package day
 
 import (
 	"flag"
-	"fmt"
 	"log"
+	"math"
 	"strings"
 
 	"github.com/stephen-mahon/advent-of-code-2023/internal/read"
 )
 
-func Four() {
+func Four() (int, int) {
 	fileName := flag.String("f", "input.txt", "input file name")
 	flag.Parse()
 
@@ -18,22 +18,29 @@ func Four() {
 		log.Fatalf("could not read %s: %v", *fileName, err)
 	}
 
-	wins, nums := cleanData(data)
+	winningNos, myNums := cleanData(data)
 
-	//fmt.Println(elfsScratchTotal(winning, numbers))
+	var part1 int
+	n := make(map[int]int)
 
-	for i := range wins {
-		matches := findNumberMatches(wins[i], nums[i])
-		fmt.Printf("%v | %v\n", i, matches)
-		for j := i + 1; j < i+matches; j++ {
-			fmt.Printf("%v | %v, ", j, findNumberMatches(wins[j], nums[j]))
+	for i := range winningNos {
+		n[i] += 1
+		numMatches := intersection(winningNos[i], myNums[i])
 
+		if numMatches > 0 {
+			part1 += int(math.Pow(2, float64(numMatches-1)))
+		}
+
+		for j := 0; j < numMatches; j++ {
+			n[i+j+1] += n[i]
 		}
 	}
-}
 
-func recursiveFindCards(index int, lines [][]string, checks [][]string, tally int, n int) int {
-	return -1
+	var part2 int
+	for _, v := range n {
+		part2 += v
+	}
+	return part1, part2
 }
 
 func cleanData(dat []string) (winArr [][]string, numArr [][]string) {
@@ -64,27 +71,7 @@ func cleanData(dat []string) (winArr [][]string, numArr [][]string) {
 	return winArr, numArr
 }
 
-func elfsScratchTotal(winning [][]string, numbers [][]string) int {
-	var total int
-	for k := range winning {
-		points := 0
-		for j := range winning[k] {
-			for i := range numbers[k] {
-				if winning[k][j] == numbers[k][i] {
-					if points == 0 {
-						points = 1
-					} else {
-						points *= 2
-					}
-				}
-			}
-		}
-		total += points
-	}
-	return total
-}
-
-func findNumberMatches(line []string, check []string) int {
+func intersection(line []string, check []string) int {
 	var match int
 	for i := range line {
 		for j := range check {
