@@ -7,7 +7,6 @@ import (
 )
 
 func main() {
-
-	fmt.Println(day.Six())
+	fmt.Println(day.Seven())
 
 }
